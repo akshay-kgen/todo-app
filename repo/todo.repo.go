@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"fmt"
+
 	"github.com/akshay-kgen/todo-app/models"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -39,6 +41,30 @@ func (r *TodoRepo) CreateTodo(todo *models.TodoModel) error {
 
 	return nil
 }
-func (r *TodoRepo) GetTodo(todo *models.TodoModel) (*models.TodoModel, error) {
-	return nil, nil
+
+func (r *TodoRepo) GetAllTodo(userId string) ([]*models.TodoModel, error) {
+
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("Todo"),
+		IndexName:              aws.String(r.GSI),
+		KeyConditionExpression: aws.String("userId = :userId"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":userId": {
+				S: aws.String(userId),
+			},
+		},
+	}
+
+	result, err := r.Client.Query(input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query todos: %w", err)
+	}
+
+	var todos []*models.TodoModel
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &todos)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal query result: %w", err)
+	}
+
+	return todos, nil
 }

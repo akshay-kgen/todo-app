@@ -5,10 +5,8 @@ import (
 	"net/http"
 
 	"github.com/akshay-kgen/todo-app/helpers"
-	"github.com/akshay-kgen/todo-app/middlewares"
 	"github.com/akshay-kgen/todo-app/services"
 	"github.com/akshay-kgen/todo-app/types"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 type TodoHandler struct {
@@ -24,15 +22,9 @@ func NewTodoHandler(service *services.TodoService) *TodoHandler {
 func (h *TodoHandler) CreateTodo(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
-	decodedUser, ok := ctx.Value(middlewares.UserContextKey).(jwt.MapClaims)
-	if !ok {
-		helpers.SendHandlerErrResponse(w, "No user found", http.StatusUnauthorized)
-		return
-	}
-
-	userId, ok := decodedUser["userId"].(string)
-	if !ok {
-		helpers.SendHandlerErrResponse(w, "Invalid user data", http.StatusUnauthorized)
+	userId, contextError := helpers.GetUserIDFromContext(ctx)
+	if contextError != nil {
+		helpers.SendHandlerErrResponse(w, contextError.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -60,4 +52,23 @@ func (h *TodoHandler) CreateTodo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(createdTodo)
+}
+
+func (h *TodoHandler) GetAllTodo(w http.ResponseWriter, r *http.Request) {
+
+	userId, err := helpers.GetUserIDFromContext(r.Context())
+	if err != nil {
+		helpers.SendHandlerErrResponse(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	todos, err := h.todoService.GetAllTodo(r.Context(), userId)
+	if err != nil {
+		helpers.SendHandlerErrResponse(w, "Failed to fetch todos", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(todos)
 }

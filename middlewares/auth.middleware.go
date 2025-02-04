@@ -5,12 +5,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/akshay-kgen/todo-app/constants"
 	"github.com/akshay-kgen/todo-app/helpers"
 )
-
-type ContextKey string
-
-const UserContextKey = ContextKey("user")
 
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +31,7 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), UserContextKey, claims)
+		ctx := context.WithValue(r.Context(), constants.UserContextKey, claims)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
