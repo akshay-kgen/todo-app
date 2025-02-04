@@ -108,3 +108,44 @@ func (h *TodoHandler) GetTodo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(todo)
 }
+
+func (h *TodoHandler) UpdateTodo(w http.ResponseWriter, r *http.Request) {
+	todoId := chi.URLParam(r, "id")
+	if todoId == "" {
+		helpers.SendHandlerErrResponse(w, "Missing todoId in the request path", http.StatusBadRequest)
+		return
+	}
+
+	userId, err := helpers.GetUserIDFromContext(r.Context())
+	if err != nil {
+		helpers.SendHandlerErrResponse(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	var todoRequestModel types.UpdateTodoReqModel
+	err = json.NewDecoder(r.Body).Decode(&todoRequestModel)
+	if err != nil {
+		helpers.SendHandlerErrResponse(w, "Invalid input data", http.StatusBadRequest)
+		return
+	}
+
+	validationError := todoRequestModel.Validate()
+	if validationError != nil {
+		helpers.SendHandlerErrResponse(w, validationError.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+
+	updatedTodo, err := h.todoService.UpdateTodo(r.Context(), userId, todoId, &todoRequestModel)
+	if err != nil {
+		if err == repo.ErrTodoNotFound {
+			helpers.SendHandlerErrResponse(w, "Todo not found", http.StatusNotFound)
+		} else {
+			helpers.SendHandlerErrResponse(w, "Failed to update todo", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(updatedTodo)
+}

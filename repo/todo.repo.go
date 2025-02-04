@@ -48,7 +48,7 @@ func (r *TodoRepo) CreateTodo(todo *models.TodoModel) error {
 func (r *TodoRepo) GetAllTodo(userId string) ([]*models.TodoModel, error) {
 
 	input := &dynamodb.QueryInput{
-		TableName:              aws.String("Todo"),
+		TableName:              aws.String(r.TableName),
 		IndexName:              aws.String(r.GSI),
 		KeyConditionExpression: aws.String("userId = :userId"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
@@ -74,7 +74,7 @@ func (r *TodoRepo) GetAllTodo(userId string) ([]*models.TodoModel, error) {
 
 func (r *TodoRepo) GetTodo(userId, todoId string) (*models.TodoModel, error) {
 	input := &dynamodb.GetItemInput{
-		TableName: aws.String("Todo"),
+		TableName: aws.String(r.TableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"userId": {
 				S: aws.String(userId),
@@ -101,4 +101,24 @@ func (r *TodoRepo) GetTodo(userId, todoId string) (*models.TodoModel, error) {
 	}
 
 	return &todo, nil
+}
+
+func (r *TodoRepo) UpdateTodo(todo *models.TodoModel) error {
+
+	todoMap, err := dynamodbattribute.MarshalMap(todo)
+	if err != nil {
+		return fmt.Errorf("failed to marshal todo: %w", err)
+	}
+
+	input := &dynamodb.PutItemInput{
+		TableName: aws.String(r.TableName),
+		Item:      todoMap,
+	}
+
+	_, err = r.Client.PutItem(input)
+	if err != nil {
+		return fmt.Errorf("failed to update todo: %w", err)
+	}
+
+	return nil
 }

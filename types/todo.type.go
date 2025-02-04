@@ -33,3 +33,20 @@ func (model *CreateTodoReqModel) ToNewTodo() (*models.TodoModel, error) {
 
 	return todo, nil
 }
+
+type UpdateTodoReqModel struct {
+	Title       *string `json:"title" validate:"omitempty,min=3,max=100"`
+	Description *string `json:"description" validate:"omitempty,min=5,max=500"`
+	Status      *string `json:"status" validate:"omitempty,oneof=created in-progress completed"`
+}
+
+func (model *UpdateTodoReqModel) Validate() error {
+	validate := validator.New()
+
+	err := validate.Struct(model)
+	if err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		return validationErrors
+	}
+	return nil
+}

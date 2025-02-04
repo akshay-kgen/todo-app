@@ -20,6 +20,7 @@ func TodoRoutes(ddb *dynamodb.DynamoDB) func(router chi.Router) {
 		r.Post("/", todoHandler.CreateTodo)
 		r.Get("/", todoHandler.GetAllTodo)
 		r.Get("/{id}", todoHandler.GetTodo)
+		r.Patch("/{id}", todoHandler.UpdateTodo)
 
 	}
 }
