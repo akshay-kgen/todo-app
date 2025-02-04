@@ -1,15 +1,25 @@
 package models
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 type UserModel struct {
-	UserID   string `json:"user_id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	UserID    string    `json:"userId"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func NewUser(userId, username, password string) *UserModel {
+func NewUser(email, password string) *UserModel {
 	return &UserModel{
-		UserID:   userId,
-		Username: username,
-		Password: password,
+		UserID:    uuid.New().String(),
+		Email:     email,
+		Password:  password,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
 	}
 }
