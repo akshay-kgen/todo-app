@@ -1,10 +1,14 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type TodoModel struct {
-	TodoID      string    `json:"todoId"`
-	UserID      string    `json:"userId"`
+	TodoId      string    `json:"todoId"`
+	UserId      string    `json:"userId"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Status      string    `json:"status"`
@@ -12,10 +16,13 @@ type TodoModel struct {
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
-func NewTodo(todoId, userId, title, description, status string) *TodoModel {
+func NewTodo(userId, title, description string, status string) *TodoModel {
+	if status == "" {
+		status = "created"
+	}
 	return &TodoModel{
-		TodoID:      todoId,
-		UserID:      userId,
+		TodoId:      uuid.New().String(),
+		UserId:      userId,
 		Title:       title,
 		Description: description,
 		Status:      status,
