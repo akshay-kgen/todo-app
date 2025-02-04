@@ -3,9 +3,12 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/akshay-kgen/todo-app/models"
 	"github.com/akshay-kgen/todo-app/repo"
+	"github.com/akshay-kgen/todo-app/types"
 )
 
 type TodoService struct {
@@ -45,4 +48,29 @@ func (s *TodoService) GetTodo(ctx context.Context, userId, todoId string) (*mode
 		return nil, err
 	}
 	return todo, nil
+}
+
+func (s *TodoService) UpdateTodo(ctx context.Context, userId, todoId string, todoRequestModel *types.UpdateTodoReqModel) (*models.TodoModel, error) {
+	existingTodo, err := s.todoRepo.GetTodo(userId, todoId)
+	if err != nil {
+		return nil, err
+	}
+
+	if todoRequestModel.Title != nil {
+		existingTodo.Title = *todoRequestModel.Title
+	}
+	if todoRequestModel.Description != nil {
+		existingTodo.Description = *todoRequestModel.Description
+	}
+	if todoRequestModel.Status != nil {
+		existingTodo.Status = *todoRequestModel.Status
+	}
+	existingTodo.UpdatedAt = time.Now()
+
+	err = s.todoRepo.UpdateTodo(existingTodo)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update todo: %w", err)
+	}
+
+	return existingTodo, nil
 }
