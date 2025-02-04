@@ -30,3 +30,11 @@ func (s *TodoService) CreateTodo(ctx context.Context, todo *models.TodoModel) (*
 
 	return todo, nil
 }
+
+func (s *TodoService) GetAllTodo(ctx context.Context, userId string) ([]*models.TodoModel, error) {
+	todos, err := s.todoRepo.GetAllTodo(userId)
+	if err != nil {
+		return nil, err
+	}
+	return todos, nil
+}
