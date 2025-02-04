@@ -31,7 +31,7 @@ func Authenticate(next http.Handler) http.Handler {
 		}
 
 		type contextKey string
-		const claimsContextKey = contextKey("claims")
+		const claimsContextKey = contextKey("user")
 
 		ctx := context.WithValue(r.Context(), claimsContextKey, claims)
 		r = r.WithContext(ctx)
