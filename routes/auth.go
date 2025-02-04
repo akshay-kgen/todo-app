@@ -16,5 +16,6 @@ func AuthRoutes(ddb *dynamodb.DynamoDB) func(router chi.Router) {
 
 	return func(r chi.Router) {
 		r.Post("/register", authHandler.Register)
+		r.Post("/login", authHandler.Login)
 	}
 }

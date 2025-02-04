@@ -40,12 +40,35 @@ func createUserTable(ddb *dynamodb.DynamoDB) {
 				AttributeName: aws.String("userId"),
 				AttributeType: aws.String("S"),
 			},
+			{
+				AttributeName: aws.String("email"),
+				AttributeType: aws.String("S"),
+			},
 		},
 
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{
 				AttributeName: aws.String("userId"),
 				KeyType:       aws.String("HASH"),
+			},
+		},
+
+		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex{
+			{
+				IndexName: aws.String("UserEmailIndex"),
+				KeySchema: []*dynamodb.KeySchemaElement{
+					{
+						AttributeName: aws.String("email"),
+						KeyType:       aws.String("HASH"),
+					},
+				},
+				Projection: &dynamodb.Projection{
+					ProjectionType: aws.String("ALL"),
+				},
+				ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+					ReadCapacityUnits:  aws.Int64(5),
+					WriteCapacityUnits: aws.Int64(5),
+				},
 			},
 		},
 

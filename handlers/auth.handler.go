@@ -48,3 +48,33 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 
 }
+
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var loginReq types.LoginReq
+
+	if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
+		helpers.SendHandlerErrResponse(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err := loginReq.Validate()
+	if err != nil {
+		helpers.SendHandlerErrResponse(w, err.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+
+	token, customError := h.authService.Login(r.Context(), loginReq.Email, loginReq.Password)
+	if customError != nil {
+		helpers.SendHandlerCustomErrResponse(w, customError, http.StatusUnauthorized)
+		return
+	}
+
+	response := map[string]interface{}{
+		"message": "Login successful",
+		"token":   token,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}

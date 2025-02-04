@@ -12,6 +12,7 @@ type Config struct {
 	PORT           string
 	AwsConfig      AwsConfig
 	DynamoEndpoint string
+	JwtSecret      string
 }
 
 var instance *Config
@@ -37,6 +38,7 @@ func Initialize() {
 			SecretKey: getEnvWithDefaultValue("AWS_SECRET_KEY", ""),
 		},
 		DynamoEndpoint: getEnvWithDefaultValue("DYNAMO_ENDPOINT", "http://localhost:8000"),
+		JwtSecret:      getEnvWithDefaultValue("JWT_SECRET", "jwt secret default"),
 	}
 
 }

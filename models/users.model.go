@@ -7,7 +7,7 @@ import (
 )
 
 type UserModel struct {
-	UserID    string    `json:"userId"`
+	UserId    string    `json:"userId"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
 	CreatedAt time.Time `json:"createdAt"`
@@ -16,7 +16,7 @@ type UserModel struct {
 
 func NewUser(email, password string) *UserModel {
 	return &UserModel{
-		UserID:    uuid.New().String(),
+		UserId:    uuid.New().String(),
 		Email:     email,
 		Password:  password,
 		CreatedAt: time.Now().UTC(),
