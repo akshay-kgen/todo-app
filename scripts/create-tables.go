@@ -25,48 +25,77 @@ func CreateDynamodbTables(configI *config.Config) {
 
 	ddb := dynamodb.New(awsSession)
 
-	createUserTodoTable(ddb)
+	createUserTable(ddb)
+
+	createTodoTable(ddb)
 
 }
 
-func createUserTodoTable(ddb *dynamodb.DynamoDB) {
+func createUserTable(ddb *dynamodb.DynamoDB) {
 	input := &dynamodb.CreateTableInput{
-		TableName: aws.String("TodoApp"),
+		TableName: aws.String("User"),
 
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
-				AttributeName: aws.String("pk"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("sk"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("entityType"),
+				AttributeName: aws.String("userId"),
 				AttributeType: aws.String("S"),
 			},
 		},
 
-		// Define primary key structure
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{
-				AttributeName: aws.String("pk"),
+				AttributeName: aws.String("userId"),
+				KeyType:       aws.String("HASH"),
+			},
+		},
+
+		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+			ReadCapacityUnits:  aws.Int64(5),
+			WriteCapacityUnits: aws.Int64(5),
+		},
+	}
+
+	_, err := ddb.CreateTable(input)
+	if err != nil {
+		fmt.Println("Error creating user table:", err)
+		return
+	}
+
+	fmt.Println("TodoApp table created successfully!")
+}
+
+func createTodoTable(ddb *dynamodb.DynamoDB) {
+	input := &dynamodb.CreateTableInput{
+		TableName: aws.String("Todo"),
+
+		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("todoId"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("userId"),
+				AttributeType: aws.String("S"),
+			},
+		},
+
+		KeySchema: []*dynamodb.KeySchemaElement{
+			{
+				AttributeName: aws.String("todoId"),
 				KeyType:       aws.String("HASH"),
 			},
 			{
-				AttributeName: aws.String("sk"),
+				AttributeName: aws.String("userId"),
 				KeyType:       aws.String("RANGE"),
 			},
 		},
 
-		// GSI for searching users and todos using entity
 		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex{
 			{
-				IndexName: aws.String("EntityIndex"), // Query Users & Todos separately
+				IndexName: aws.String("UserIndex"),
 				KeySchema: []*dynamodb.KeySchemaElement{
 					{
-						AttributeName: aws.String("entityType"),
+						AttributeName: aws.String("userId"),
 						KeyType:       aws.String("HASH"),
 					},
 				},
@@ -79,7 +108,6 @@ func createUserTodoTable(ddb *dynamodb.DynamoDB) {
 				},
 			},
 		},
-
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
 			ReadCapacityUnits:  aws.Int64(5),
 			WriteCapacityUnits: aws.Int64(5),
@@ -88,9 +116,9 @@ func createUserTodoTable(ddb *dynamodb.DynamoDB) {
 
 	_, err := ddb.CreateTable(input)
 	if err != nil {
-		fmt.Println("Error creating table:", err)
+		fmt.Println("Error creating todo table:", err)
 		return
 	}
 
-	fmt.Println("TodoApp table created successfully!")
+	fmt.Println("Todo table created successfully!")
 }
