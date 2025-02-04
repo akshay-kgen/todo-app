@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/akshay-kgen/todo-app/models"
@@ -14,6 +15,8 @@ type TodoRepo struct {
 	GSI       string
 	TableName string
 }
+
+var ErrTodoNotFound = errors.New("todo not found")
 
 func NewTodoRepo(ddb *dynamodb.DynamoDB) *TodoRepo {
 	return &TodoRepo{
@@ -67,4 +70,35 @@ func (r *TodoRepo) GetAllTodo(userId string) ([]*models.TodoModel, error) {
 	}
 
 	return todos, nil
+}
+
+func (r *TodoRepo) GetTodo(userId, todoId string) (*models.TodoModel, error) {
+	input := &dynamodb.GetItemInput{
+		TableName: aws.String("Todo"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"userId": {
+				S: aws.String(userId),
+			},
+			"todoId": {
+				S: aws.String(todoId),
+			},
+		},
+	}
+
+	result, err := r.Client.GetItem(input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get todo: %w", err)
+	}
+
+	if result.Item == nil {
+		return nil, ErrTodoNotFound
+	}
+
+	var todo models.TodoModel
+	err = dynamodbattribute.UnmarshalMap(result.Item, &todo)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal result: %w", err)
+	}
+
+	return &todo, nil
 }
