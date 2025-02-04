@@ -21,6 +21,7 @@ func TodoRoutes(ddb *dynamodb.DynamoDB) func(router chi.Router) {
 		r.Get("/", todoHandler.GetAllTodo)
 		r.Get("/{id}", todoHandler.GetTodo)
 		r.Patch("/{id}", todoHandler.UpdateTodo)
+		r.Delete("/{id}", todoHandler.DeleteTodo)
 
 	}
 }

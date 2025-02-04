@@ -74,3 +74,12 @@ func (s *TodoService) UpdateTodo(ctx context.Context, userId, todoId string, tod
 
 	return existingTodo, nil
 }
+
+func (s *TodoService) DeleteTodo(ctx context.Context, userId, todoId string) error {
+
+	err := s.todoRepo.DeleteTodo(userId, todoId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
