@@ -20,5 +20,15 @@ func NewRoutes(ddb *dynamodb.DynamoDB) http.Handler {
 		w.Write([]byte(`Hello World`))
 	})
 
+	router.Route("/api", loadApiRoutes(ddb))
+
 	return router
+}
+
+func loadApiRoutes(
+	ddb *dynamodb.DynamoDB,
+) func(router chi.Router) {
+	return func(r chi.Router) {
+		r.Route("/auth", AuthRoutes(ddb))
+	}
 }
