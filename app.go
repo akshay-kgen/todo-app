@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 
+	"github.com/akshay-kgen/todo-app/config"
 	"github.com/akshay-kgen/todo-app/routes"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -15,26 +15,26 @@ import (
 type App struct {
 	router http.Handler
 	ddb    *dynamodb.DynamoDB
+	config *config.Config
 }
 
-func NewApp() *App {
-	region := os.Getenv("AWS_REGION")
-	ddbEndpoint := os.Getenv("DYNAMO_ENDPOINT")
+func NewApp(configI *config.Config) *App {
 
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
 		Config: aws.Config{
-			Region:   &region,
-			Endpoint: &ddbEndpoint,
+			Region:   &configI.AwsConfig.Region,
+			Endpoint: &configI.DynamoEndpoint,
 			Credentials: credentials.NewStaticCredentials(
-				os.Getenv("AWS_ACCESS_KEY"),
-				os.Getenv("AWS_SECRET_KEY"),
+				configI.AwsConfig.AccessKey,
+				configI.AwsConfig.SecretKey,
 				"",
 			),
 		},
 	}))
 
 	app := &App{
-		ddb: dynamodb.New(awsSession),
+		ddb:    dynamodb.New(awsSession),
+		config: configI,
 	}
 
 	app.loadRoutes()
@@ -43,8 +43,9 @@ func NewApp() *App {
 }
 
 func (app *App) Start() error {
+
 	server := &http.Server{
-		Addr:    ":3000",
+		Addr:    fmt.Sprintf(":%s", app.config.PORT),
 		Handler: app.router,
 	}
 
@@ -52,6 +53,9 @@ func (app *App) Start() error {
 	if err != nil {
 		return fmt.Errorf("error connecting db: %w", err)
 	}
+
+	// create table script
+	// scripts.CreateDynamodbTables(app.config)
 
 	err = server.ListenAndServe()
 	if err != nil {
