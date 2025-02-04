@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -36,4 +37,24 @@ func (s *AuthService) Register(ctx context.Context, user *models.UserModel) *hel
 	}
 
 	return nil
+}
+
+func (s *AuthService) Login(ctx context.Context, email, password string) (string, *helpers.CustomError) {
+
+	user, err := s.userRepo.GetUserByEmail(email)
+	if err != nil {
+		return "", helpers.NewCustomError(errors.New("invalid email or password"), "401")
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return "", helpers.NewCustomError(errors.New("invalid email or password"), "401")
+	}
+
+	token, err := helpers.GenerateJwt(user.UserId, user.Email)
+	fmt.Println("tokennn", token)
+	if err != nil {
+		return "", helpers.NewCustomError(errors.New("failed to generate token"), "500")
+	}
+
+	return token, nil
 }
