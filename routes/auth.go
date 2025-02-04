@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/akshay-kgen/todo-app/handlers"
+	"github.com/akshay-kgen/todo-app/middlewares"
 	"github.com/akshay-kgen/todo-app/repo"
 	"github.com/akshay-kgen/todo-app/services"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -17,5 +18,6 @@ func AuthRoutes(ddb *dynamodb.DynamoDB) func(router chi.Router) {
 	return func(r chi.Router) {
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
+		r.With(middlewares.Authenticate).Delete("/logout", authHandler.Logout)
 	}
 }
