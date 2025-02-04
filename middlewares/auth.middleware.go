@@ -8,6 +8,10 @@ import (
 	"github.com/akshay-kgen/todo-app/helpers"
 )
 
+type ContextKey string
+
+const UserContextKey = ContextKey("user")
+
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
@@ -30,10 +34,7 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		type contextKey string
-		const claimsContextKey = contextKey("user")
-
-		ctx := context.WithValue(r.Context(), claimsContextKey, claims)
+		ctx := context.WithValue(r.Context(), UserContextKey, claims)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
