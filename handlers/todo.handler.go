@@ -2,11 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/akshay-kgen/todo-app/helpers"
+	"github.com/akshay-kgen/todo-app/repo"
 	"github.com/akshay-kgen/todo-app/services"
 	"github.com/akshay-kgen/todo-app/types"
+	"github.com/go-chi/chi/v5"
 )
 
 type TodoHandler struct {
@@ -71,4 +74,37 @@ func (h *TodoHandler) GetAllTodo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(todos)
+}
+
+func (h *TodoHandler) GetTodo(w http.ResponseWriter, r *http.Request) {
+
+	todoId := chi.URLParam(r, "id")
+	if todoId == "" {
+		customErr := helpers.NewCustomError(errors.New("missing todoId in the request path"), "MISSING_TODO_ID")
+		helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusBadRequest)
+		return
+	}
+
+	userId, err := helpers.GetUserIDFromContext(r.Context())
+	if err != nil {
+		customErr := helpers.NewCustomError(err, "UNAUTHORIZED_ACCESS")
+		helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusUnauthorized)
+		return
+	}
+
+	todo, err := h.todoService.GetTodo(r.Context(), userId, todoId)
+	if err != nil {
+		if errors.Is(err, repo.ErrTodoNotFound) {
+			customErr := helpers.NewCustomError(errors.New("todo not found"), "TODO_NOT_FOUND")
+			helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusNotFound)
+		} else {
+			customErr := helpers.NewCustomError(errors.New("failed to fetch todo"), "FETCH_TODO_ERROR")
+			helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(todo)
 }

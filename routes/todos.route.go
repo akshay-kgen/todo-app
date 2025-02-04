@@ -19,6 +19,7 @@ func TodoRoutes(ddb *dynamodb.DynamoDB) func(router chi.Router) {
 		r.Use(middlewares.Authenticate)
 		r.Post("/", todoHandler.CreateTodo)
 		r.Get("/", todoHandler.GetAllTodo)
+		r.Get("/{id}", todoHandler.GetTodo)
 
 	}
 }
