@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/akshay-kgen/todo-app/models"
 	"github.com/go-playground/validator/v10"
@@ -30,4 +31,11 @@ func (model *CreateUserReqModel) ToNewUser() (*models.UserModel, error) {
 	user := models.NewUser(model.Email, model.Password)
 
 	return user, nil
+}
+
+type UserResponseModel struct {
+	UserId    string    `json:"userId"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
