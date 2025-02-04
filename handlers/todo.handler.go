@@ -149,3 +149,29 @@ func (h *TodoHandler) UpdateTodo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(updatedTodo)
 }
+
+func (h *TodoHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
+	todoId := chi.URLParam(r, "id")
+	if todoId == "" {
+		helpers.SendHandlerErrResponse(w, "Missing todoId in the request path", http.StatusBadRequest)
+		return
+	}
+
+	userId, err := helpers.GetUserIDFromContext(r.Context())
+	if err != nil {
+		helpers.SendHandlerErrResponse(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	err = h.todoService.DeleteTodo(r.Context(), userId, todoId)
+	if err != nil {
+		if err == repo.ErrTodoNotFound {
+			helpers.SendHandlerErrResponse(w, "Todo not found", http.StatusNotFound)
+		} else {
+			helpers.SendHandlerErrResponse(w, "Failed to delete todo", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

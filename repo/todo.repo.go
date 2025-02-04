@@ -122,3 +122,25 @@ func (r *TodoRepo) UpdateTodo(todo *models.TodoModel) error {
 
 	return nil
 }
+
+func (r *TodoRepo) DeleteTodo(userId, todoId string) error {
+	input := &dynamodb.DeleteItemInput{
+		TableName: aws.String(r.TableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"userId": {
+				S: aws.String(userId),
+			},
+			"todoId": {
+				S: aws.String(todoId),
+			},
+		},
+		ConditionExpression: aws.String("attribute_exists(todoId)"),
+	}
+
+	_, err := r.Client.DeleteItem(input)
+	if err != nil {
+		return fmt.Errorf("failed to delete todo: %w", err)
+	}
+
+	return nil
+}
