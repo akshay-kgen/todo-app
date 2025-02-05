@@ -22,7 +22,7 @@ func NewTodoRepo(ddb *dynamodb.DynamoDB) *TodoRepo {
 	return &TodoRepo{
 		Client:    ddb,
 		GSI:       "UserIndex",
-		TableName: "Todo",
+		TableName: "Todos",
 	}
 }
 

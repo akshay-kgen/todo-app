@@ -2,41 +2,13 @@ package helpers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"net/url"
-	"strconv"
 )
 
 const (
 	ContentTypeHeader = "Content-Type"
 	ApplicationJSON   = "application/json"
 )
-
-func ParsePaginationParams(r *http.Request) (limit int, offset interface{}, err error) {
-	limit = 15 // Default page size
-	if limitQParam := r.URL.Query().Get("pageLimit"); limitQParam != "" {
-		limit, err = strconv.Atoi(limitQParam)
-		if err != nil {
-			return limit, offset, fmt.Errorf("failed in parsing limit: %w", err)
-		}
-	}
-
-	var pageOffsetMap map[string]interface{}
-	pageOffset := r.URL.Query().Get("pageOffset")
-	if pageOffset != "" {
-		decodedPageOffset, err := url.QueryUnescape(pageOffset)
-		if err != nil {
-			return limit, offset, fmt.Errorf("failed to decode pageOffset: %w", err)
-		}
-		err = json.Unmarshal([]byte(decodedPageOffset), &pageOffsetMap)
-		if err != nil {
-			return limit, offset, fmt.Errorf("failed to unmarshal pageOffset: %w", err)
-		}
-	}
-
-	return limit, pageOffsetMap, nil
-}
 
 type ErrorResponse struct {
 	Error string `json:"error"`
@@ -49,7 +21,7 @@ func SendHandlerErrResponse(w http.ResponseWriter, msg string, status int) {
 	if err != nil {
 		w.Header().Set(ContentTypeHeader, ApplicationJSON)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error":"Internal Server Error"}`)) // Simple JSON response
+		w.Write([]byte(`{"error":"Internal Server Error"}`))
 		return
 	}
 
@@ -82,7 +54,7 @@ func SendHandlerCustomErrResponse(w http.ResponseWriter, customErr *CustomError,
 	if err != nil {
 		w.Header().Set(ContentTypeHeader, ApplicationJSON)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error":"Internal Server Error"}`)) // Simple JSON response
+		w.Write([]byte(`{"error":"Internal Server Error"}`))
 		return
 	}
 
