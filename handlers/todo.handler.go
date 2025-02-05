@@ -83,7 +83,7 @@ func (h *TodoHandler) GetTodo(w http.ResponseWriter, r *http.Request) {
 	userId, err := helpers.GetUserIDFromContext(r.Context())
 	if err != nil {
 		customErr := helpers.NewCustomError(err, 401)
-		helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusUnauthorized)
+		helpers.SendHandlerCustomErrResponse(w, customErr, customErr.StatusCode)
 		return
 	}
 
@@ -91,10 +91,10 @@ func (h *TodoHandler) GetTodo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, repo.ErrTodoNotFound) {
 			customErr := helpers.NewCustomError(errors.New("todo not found"), 404)
-			helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusNotFound)
+			helpers.SendHandlerCustomErrResponse(w, customErr, customErr.StatusCode)
 		} else {
 			customErr := helpers.NewCustomError(errors.New("failed to fetch todo"), 400)
-			helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusInternalServerError)
+			helpers.SendHandlerCustomErrResponse(w, customErr, customErr.StatusCode)
 		}
 		return
 	}
