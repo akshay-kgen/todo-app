@@ -84,7 +84,7 @@ func createUserTable(ddb *dynamodb.DynamoDB) {
 		return
 	}
 
-	fmt.Println("TodoApp table created successfully!")
+	fmt.Println("Users table created successfully!")
 }
 
 func createTodoTable(ddb *dynamodb.DynamoDB) {
@@ -143,5 +143,5 @@ func createTodoTable(ddb *dynamodb.DynamoDB) {
 		return
 	}
 
-	fmt.Println("Todo table created successfully!")
+	fmt.Println("Todos table created successfully!")
 }

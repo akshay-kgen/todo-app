@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/app 
+      - .:/app
     depends_on:
       - dynamodb
     networks:
@@ -17,17 +17,31 @@ services:
     command: ["air"]
 
   dynamodb:
-    image: amazon/dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local"
     container_name: todo-dynamodb
     ports:
       - "8000:8000"
     volumes:
-      - dynamodb_data:/data
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+    networks:
+      - todo-network
+  
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    container_name: todo-dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      - DYNAMO_ENDPOINT=http://dynamodb:8000
+    depends_on:
+      - dynamodb
     networks:
       - todo-network
 
 volumes:
-  dynamodb_data:
+  dynamodb_data: 
 
 networks:
   todo-network:
