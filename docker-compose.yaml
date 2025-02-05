@@ -1,0 +1,34 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: todo-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app 
+    depends_on:
+      - dynamodb
+    networks:
+      - todo-network
+    command: ["air"]
+
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: todo-dynamodb
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb_data:/data
+    networks:
+      - todo-network
+
+volumes:
+  dynamodb_data:
+
+networks:
+  todo-network:
+    driver: bridge

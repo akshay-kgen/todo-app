@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/akshay-kgen/todo-app/models"
@@ -20,7 +19,7 @@ func NewUserRepo(ddb *dynamodb.DynamoDB) *UserRepo {
 	return &UserRepo{
 		Client:    ddb,
 		GSI:       "UserEmailIndex",
-		TableName: "User",
+		TableName: "Users",
 	}
 }
 
@@ -59,7 +58,7 @@ func (r *UserRepo) GetUserByEmail(email string) (*models.UserModel, error) {
 	}
 
 	if len(result.Items) == 0 {
-		return nil, errors.New("user not found")
+		return nil, nil
 	}
 
 	var user models.UserModel

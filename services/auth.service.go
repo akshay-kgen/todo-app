@@ -58,6 +58,10 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (string
 		return "", helpers.NewCustomError(errors.New("invalid email or password"), "401")
 	}
 
+	if user == nil {
+		return "", helpers.NewCustomError(errors.New("invalid email or password"), "401")
+	}
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return "", helpers.NewCustomError(errors.New("invalid email or password"), "401")
 	}

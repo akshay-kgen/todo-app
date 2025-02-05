@@ -33,7 +33,7 @@ func CreateDynamodbTables(configI *config.Config) {
 
 func createUserTable(ddb *dynamodb.DynamoDB) {
 	input := &dynamodb.CreateTableInput{
-		TableName: aws.String("User"),
+		TableName: aws.String("Users"),
 
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
@@ -89,7 +89,7 @@ func createUserTable(ddb *dynamodb.DynamoDB) {
 
 func createTodoTable(ddb *dynamodb.DynamoDB) {
 	input := &dynamodb.CreateTableInput{
-		TableName: aws.String("Todo"),
+		TableName: aws.String("Todos"),
 
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
