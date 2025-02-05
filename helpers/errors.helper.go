@@ -31,25 +31,24 @@ func SendHandlerErrResponse(w http.ResponseWriter, msg string, status int) {
 }
 
 type CustomError struct {
-	Error   error  `json:"error"`
-	ErrCode string `json:"errCode"`
+	Error      error `json:"error"`
+	StatusCode int   `json:"statusCode"`
 }
 
 type CustomErrorResponse struct {
-	Error   string `json:"error"`
-	ErrCode string `json:"errCode"`
+	Error string `json:"error"`
 }
 
-func NewCustomError(err error, errCode string) *CustomError {
+func NewCustomError(err error, statusCode int) *CustomError {
 	return &CustomError{
-		Error:   err,
-		ErrCode: errCode,
+		Error:      err,
+		StatusCode: statusCode,
 	}
 }
 
 func SendHandlerCustomErrResponse(w http.ResponseWriter, customErr *CustomError, status int) {
 	responseJSON, err := json.Marshal(
-		CustomErrorResponse{Error: customErr.Error.Error(), ErrCode: customErr.ErrCode},
+		CustomErrorResponse{Error: customErr.Error.Error()},
 	)
 	if err != nil {
 		w.Header().Set(ContentTypeHeader, ApplicationJSON)
@@ -64,5 +63,5 @@ func SendHandlerCustomErrResponse(w http.ResponseWriter, customErr *CustomError,
 }
 
 func (e *CustomError) Is(target *CustomError) bool {
-	return e.Error == target.Error && e.ErrCode == target.ErrCode
+	return e.Error == target.Error
 }

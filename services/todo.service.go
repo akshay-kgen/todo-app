@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -22,9 +21,6 @@ func NewTodoService(repo *repo.TodoRepo) *TodoService {
 }
 
 func (s *TodoService) CreateTodo(ctx context.Context, todo *models.TodoModel) (*models.TodoModel, error) {
-	if todo.Title == "" {
-		return nil, errors.New("title cannot be empty")
-	}
 
 	err := s.todoRepo.CreateTodo(todo)
 	if err != nil {

@@ -35,7 +35,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	customError := h.authService.Register(r.Context(), user)
 	if customError != nil {
-		helpers.SendHandlerCustomErrResponse(w, customError, http.StatusBadRequest)
+		helpers.SendHandlerCustomErrResponse(w, customError, customError.StatusCode)
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, customError := h.authService.Login(r.Context(), loginReq.Email, loginReq.Password)
 	if customError != nil {
-		helpers.SendHandlerCustomErrResponse(w, customError, http.StatusUnauthorized)
+		helpers.SendHandlerCustomErrResponse(w, customError, customError.StatusCode)
 		return
 	}
 
