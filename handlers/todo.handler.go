@@ -79,15 +79,10 @@ func (h *TodoHandler) GetAllTodo(w http.ResponseWriter, r *http.Request) {
 func (h *TodoHandler) GetTodo(w http.ResponseWriter, r *http.Request) {
 
 	todoId := chi.URLParam(r, "id")
-	if todoId == "" {
-		customErr := helpers.NewCustomError(errors.New("missing todoId in the request path"), "MISSING_TODO_ID")
-		helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusBadRequest)
-		return
-	}
 
 	userId, err := helpers.GetUserIDFromContext(r.Context())
 	if err != nil {
-		customErr := helpers.NewCustomError(err, "UNAUTHORIZED_ACCESS")
+		customErr := helpers.NewCustomError(err, 401)
 		helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusUnauthorized)
 		return
 	}
@@ -95,10 +90,10 @@ func (h *TodoHandler) GetTodo(w http.ResponseWriter, r *http.Request) {
 	todo, err := h.todoService.GetTodo(r.Context(), userId, todoId)
 	if err != nil {
 		if errors.Is(err, repo.ErrTodoNotFound) {
-			customErr := helpers.NewCustomError(errors.New("todo not found"), "TODO_NOT_FOUND")
+			customErr := helpers.NewCustomError(errors.New("todo not found"), 404)
 			helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusNotFound)
 		} else {
-			customErr := helpers.NewCustomError(errors.New("failed to fetch todo"), "FETCH_TODO_ERROR")
+			customErr := helpers.NewCustomError(errors.New("failed to fetch todo"), 400)
 			helpers.SendHandlerCustomErrResponse(w, customErr, http.StatusInternalServerError)
 		}
 		return
